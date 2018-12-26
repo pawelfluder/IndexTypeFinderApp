@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace IndexTypeFinderApp
 {
-   public class IndexUpadater
+   public class IndexUpdater
    {
       public void Update(FolderItem folderItem, string folderPath)
       {

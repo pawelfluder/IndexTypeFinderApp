@@ -13,7 +13,7 @@ namespace IndexTypeFinderApp
          FolderStructure finder = new FolderStructure();
          ConsoleTreePrinter consoleTreePrinter = new ConsoleTreePrinter();
          IndexTypeFinder indexTypeFinder = new IndexTypeFinder();
-         IndexUpadater indexUpadater = new IndexUpadater();
+         IndexUpdater indexUpdater = new IndexUpdater();
          IndexDateFinder indexDateFinder = new IndexDateFinder();
 
          FolderItem folderItem = finder.Find(publicHtmlPath);
@@ -25,12 +25,12 @@ namespace IndexTypeFinderApp
 
          if (doYouWantToUpdate)
          {
-            indexUpadater.Update(folderItem, publicHtmlPath);
+            indexUpdater.Update(folderItem, publicHtmlPath);
             indexTypeFinder.Find(folderItem, publicHtmlPath);
             indexDateFinder.Find(folderItem, publicHtmlPath);
             consoleTreePrinter.Print(folderItem);
          }
-
+         //Thank you we finish in 10 seconds or you can close console window manually
          Console.ReadLine();
       }
    }
