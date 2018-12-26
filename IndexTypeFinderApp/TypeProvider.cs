@@ -4,9 +4,9 @@
    {
       public enum IndexType
       {
-         Unknown,
-         Folder,
-         Text
+         unknown,
+         folder,
+         text
       }
    }
 }

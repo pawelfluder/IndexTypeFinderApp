@@ -3,17 +3,19 @@ using System.IO;
 
 namespace IndexTypeFinderApp
 {
-   public struct FolderItem
+   public class FolderItem
    {
       public string Name { get; }
       public List<FolderItem> SubFolderItems { get; }
-      public TypeProvider.IndexType Type { get; }
+      public TypeProvider.IndexType Type { get; private set; }
+      public Date SourceDate { get; private set; }
 
       public FolderItem(string name)
       {
          Name = name;
          SubFolderItems = new List<FolderItem>();
-         Type = TypeProvider.IndexType.Unknown;
+         Type = TypeProvider.IndexType.unknown;
+         SourceDate = new Date();
       }
 
       public void AddSubFolders(string[] subFoldersNames)
@@ -22,6 +24,16 @@ namespace IndexTypeFinderApp
          {
             SubFolderItems.Add(new FolderItem(subFolderName));
          }
+      }
+
+      public void ChangeType(TypeProvider.IndexType type)
+      {
+         Type = type;
+      }
+
+      public void ChangeSourceDate(Date sourceDate)
+      {
+         SourceDate = sourceDate;
       }
 
       private string[] GetSubFoldersNames(string path)

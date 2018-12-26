@@ -1,57 +1,39 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace IndexTypeFinderApp
 {
    public class IndexTypeFinder
    {
-      private bool _onlyTwoDigitFolders;
-
-      public FolderItem Find(string path, bool onlyTwoDigitFolders = true)
+      public void Find(FolderItem folderItem, string path)
       {
-         _onlyTwoDigitFolders = onlyTwoDigitFolders;
-         return GetSubDirectories(path);
+         FindRecursively(folderItem, path);
       }
 
-      private FolderItem GetSubDirectories(string path)
+      private void FindRecursively(FolderItem folderItem, string path)
       {
-         string directoryName = Path.GetFileName(path);
-         FolderItem folderItem = new FolderItem(directoryName);
-         SetAllSubFolders(folderItem, path);
-
-         return folderItem;
-      }
-
-      private void SetAllSubFolders(FolderItem folderItem, string path)
-      {
-         string[] subFoldersNames = GetSubFoldersNames(path);
-         string[] names = FilterSubFolderNames(subFoldersNames);
-         folderItem.AddSubFolders(names);
-
-         foreach (var subFolderItem in folderItem.SubFolderItems)
+         if (CheckIfFolderExists(folderItem, path))
          {
-            string subFolderPath = string.Concat(path, @"\", subFolderItem.Name);
-            SetAllSubFolders(subFolderItem, subFolderPath);
+            TypeProvider.IndexType type = GetType(path);
+            folderItem.ChangeType(type);
+            foreach (var subFolderItem in folderItem.SubFolderItems)
+            {
+               string subFolderPath = string.Concat(path, @"\", subFolderItem.Name);
+               FindRecursively(subFolderItem, subFolderPath);
+            }
          }
       }
 
-      private string[] FilterSubFolderNames(string[] subFoldersNames)
+      private bool CheckIfFolderExists(FolderItem folderItem, string path)
       {
-         if (_onlyTwoDigitFolders == true)
-         {
-            return subFoldersNames.Where(x => IsTwoDigitString(x)).ToArray();
-         }
-
-         return subFoldersNames;
-      }
-
-      private bool IsTwoDigitString(string name)
-      {
-         if (name != null &&
-             name.Length == 2 &&
-             char.IsDigit(name[0]) &&
-             char.IsDigit(name[1]))
+         bool fileExists = Directory.Exists(path);
+         bool correctName = Path.GetFileName(path) == folderItem.Name;
+         if (fileExists && correctName)
          {
             return true;
          }
@@ -59,17 +41,31 @@ namespace IndexTypeFinderApp
          return false;
       }
 
-      private string[] GetSubFoldersNames(string path)
+      private TypeProvider.IndexType GetType(string folderPath)
       {
-         string[] subFoldersPaths = Directory.GetDirectories(path);
-         List<string> subFoldersNames = new List<string>();
-         foreach (var subFoldersPath in subFoldersPaths)
+         string indexPath = string.Concat(folderPath, @"\", "index.php");
+         string[] lines = System.IO.File.ReadAllLines(indexPath);
+         List<string> foundLines = new List<string>();
+
+         foreach (string line in lines)
          {
-            string subFoldersName = Path.GetFileName(subFoldersPath);
-            subFoldersNames.Add(subFoldersName);
+            if (line.Contains("$typeName = ") ||
+                line.Contains("$typeOfIndex = "))
+            {
+               foundLines.Add(line);
+            }
          }
 
-         return subFoldersNames.ToArray();
+         if (foundLines.Count == 1)
+         {
+            MatchCollection matches = Regex.Matches(foundLines[0], "\"([^\"]*)\"");
+            string type = matches[0].Value.TrimStart('"').TrimEnd('"').TrimEnd('\\').TrimEnd('/');
+            Enum.TryParse(type, out TypeProvider.IndexType indexTypeEnum);
+
+            return indexTypeEnum;
+         }
+
+         return TypeProvider.IndexType.unknown;
       }
    }
 }

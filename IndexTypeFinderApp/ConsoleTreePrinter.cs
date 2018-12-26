@@ -10,7 +10,11 @@ namespace IndexTypeFinderApp
 
       public void Print(FolderItem folderItem)
       {
-         Console.WriteLine(folderItem.Name);
+         string line = string.Concat(folderItem.Name, _separator,
+                                     folderItem.Type, _separator,
+                                     folderItem.SourceDate.ToString());
+
+         Console.WriteLine(line);
          PrintAllSubFolders(folderItem, 0);
       }
 
@@ -20,7 +24,9 @@ namespace IndexTypeFinderApp
          foreach (var subFolderItem in folderItem.SubFolderItems)
          {
             string indentation = new string(_space, _numOfSpaces * nextLevel);
-            string line = string.Concat(indentation, subFolderItem.Name, _separator, subFolderItem.Type);
+            string line = string.Concat(indentation, subFolderItem.Name, _separator, 
+                                                     subFolderItem.Type, _separator,
+                                                     subFolderItem.SourceDate.ToString());
             Console.WriteLine(line);
             PrintAllSubFolders(subFolderItem, nextLevel);
          }
